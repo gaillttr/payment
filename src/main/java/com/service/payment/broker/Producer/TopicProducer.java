@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.example.demo.model.Order;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.service.payment.model.Payment;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

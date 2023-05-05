@@ -1,0 +1,125 @@
+workspace {
+
+    model {
+        user = person "User"
+        softwareSystem1 = softwareSystem "Payment System" {
+            webapp = container "Order fulfillment application" {
+                user -> this "Validate and Update my Payment"
+            }
+            
+            service1 = group "Payment Service" {
+                service1Api = container "Accounting \n Receive Payment" {
+                    tags "Service 1" "Service API"
+                    webapp -> this
+                    
+                    component1 = component "PaymentController" "get a payment detail and \n provide a Receipt payment of \n each sale order"
+                    component2 = component "PaymentRepository"
+                    component3 = component "PaymentEntity" "payment detail data"
+                    component4 = component "PaymentService" "listAllPayment() \n savePayment() \n getPayment()"
+                    
+                    component1 -> component2
+                    component2 -> component3
+                    component1 -> component4
+                    component4 -> component2
+                    component4 -> component3
+                    component1 -> component3
+                    
+                }
+                
+                data = container "Payment Database" {
+                    tags "Service 1" "Database"
+                    service1Api -> this "Reads from and writes to"
+                    
+                }
+            }
+            
+            user -> component1 "URL"
+            component2 -> data "Reads from and writes to"
+            
+            kafka = group "Kafka Message" {
+                kafkaMessage = container "[Container : Kafka] \n Receipt Message" {
+                    tags "Kafka" "Kafka Message"
+                    service1Api -> this 
+                }
+            }
+            
+            service2 = group "Order Service" {
+                service2Api = container "Order" {
+                    tags "Service 2" "Service API"
+                    kafkaMessage -> this "Listens to data updated events \n [Kafka]"
+                }
+                container "Order Database" {
+                    tags "Service 2" "Database"
+                    service2Api -> this "Reads from and writes to"
+                }
+            }
+
+            service3 = group "Reporting Service" {
+                service3Api = container "Reporting" {
+                    tags "Service 3" "Service API"
+                    kafkaMessage -> service3Api "Publishes data update events \n [Kafka]"
+                }
+                container "Reporting Database" {
+                    tags "Service 3" "Database"
+                    service3Api -> this "Reads from and writes to"
+                }
+            }
+        }
+        
+        softwareSystem2 = softwareSystem "Order System" {
+            softwareSystem1 -> this "Get Purchase Order Data"
+        }
+        
+        softwareSystem3 = softwareSystem "Reporting System" {
+            softwareSystem1 -> this "Send Receipt of Sale Order"
+        }
+    }
+    
+    views {
+        systemContext softwareSystem1 {
+            include *
+            autolayout lr
+        }
+
+        container softwareSystem1 {
+            include *
+            autolayout lr
+        }
+        
+        component service1Api {
+            include component1 component2 component3 component4 data user
+            autoLayout
+        }
+        
+        theme default
+        
+
+        styles {
+            element "Person" {
+                shape Person
+            }
+            element "Service API" {
+                shape hexagon
+            }
+            element "Database" {
+                shape cylinder
+            }
+            element "Service 1" {
+                background #91F0AE
+                color #000000
+            }
+            element "Service 2" {
+                background #EDF08C
+                color #000000
+            }
+            element "Service 3" {
+                background #8CD0F0
+                color #000000
+            }
+            element "Kafka" {
+                background #C39BD3
+                color #000000
+            }
+        }
+    }
+}
